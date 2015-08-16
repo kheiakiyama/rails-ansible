@@ -1,0 +1,11 @@
+---
+- name: install git
+  yum: name=git state=latest
+
+- name: git clone/pull
+  git:
+    repo={{ repo }}
+    dest={{ dest }}
+    accept_hostkey=yes
+    force=yes
+    version={{ branch }}

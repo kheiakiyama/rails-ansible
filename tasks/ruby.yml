@@ -1,0 +1,31 @@
+---
+- name: install rbenv
+  git: repo=https://github.com/sstephenson/rbenv.git dest={{ ansible_env.HOME }}/.rbenv accept_hostkey=yes
+
+- name: setup rbenv
+  lineinfile:
+    dest=~/.bash_profile
+    state=present
+    line='{{ item.line }}'
+  with_items:
+  - line: 'export PATH={{ ansible_env.HOME }}/.rbenv/bin:$PATH'
+  - line: 'eval "$(rbenv init -)"'
+
+- name: install ruby-build
+  git: repo=https://github.com/sstephenson/ruby-build.git dest={{ ansible_env.HOME }}/.rbenv/plugins/ruby-build accept_hostkey=yes
+
+- name: install ruby dependencies
+  yum: name={{ item }} state=latest
+  with_items:
+    - gcc
+    - gcc-c++
+    - openssl-devel
+    - libyaml-devel
+    - readline-devel
+    - zlib-devel
+    - libffi-devel
+    - libxml2-devel
+    - libxslt-devel
+
+- name: install ruby
+  shell: /bin/bash -lc "rbenv install -s {{ ruby_version }} && rbenv rehash && rbenv global {{ ruby_version }}"

@@ -1,0 +1,9 @@
+[rails]
+xxx.xxx.xxx.xxx
+
+[rails:vars]
+repo=git@hostname:rails_app.git
+project=rails_app
+ruby_version=1.9.3-p545
+unicorn_sock=/tmp/unicorn.sock
+db_password=

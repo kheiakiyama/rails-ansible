@@ -1,0 +1,34 @@
+---
+- name: check database password
+  shell: grep 'password{{ colon }} {{ db_password }}' {{ dest }}/config/database.yml
+  register: check_database_password
+  ignore_errors: yes
+
+- name: set database password
+  lineinfile:
+    dest={{ dest }}/config/database.yml
+    regexp="^  password{{ colon }} <%= ENV\['.+'\] %>$"
+    line='  password{{ colon }} {{ db_password }}'
+  when: check_database_password|failed
+
+- name: rake db:version
+  command:
+    bin/rake db:version
+    chdir={{ dest }}
+  environment: env
+  register: rake_db_version
+  ignore_errors: yes
+
+- name: rake db:setup
+  command:
+    bin/rake db:setup
+    chdir={{ dest }}
+  environment: env
+  when: rake_db_version|failed
+
+- name: rake db:migrate
+  command:
+    bin/rake db:migrate
+    chdir={{ dest }}
+  environment: env
+  when: rake_db_version|success

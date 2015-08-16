@@ -1,0 +1,40 @@
+---
+- name: copy unicorn conf
+  template:
+    src=unicorn.j2
+    dest={{ dest }}/config/unicorn.rb
+    owner=root
+    group=root
+    mode=0755
+
+- name: copy unicorn service script
+  template:
+    src=unicorn-service.j2
+    dest={{ dest }}/unicorn.sh
+    owner=root
+    group=root
+    mode=0755
+
+- name: make pid directory
+  file: 
+    path={{ dest }}/tmp/pids
+    state=directory
+    mode=0755
+
+- name: stop rails
+  shell: /bin/bash -lc "sh {{ dest }}/unicorn.sh stop"
+  ignore_errors: yes
+  args:
+    chdir: "{{ dest }}"
+    
+- name: start rails
+  shell: /bin/bash -lc "sh {{ dest }}/unicorn.sh start"
+  args:
+    chdir: "{{ dest }}"
+
+- name: restart nginx
+  service:
+    name=nginx
+    enabled=yes
+    state=restarted
+  sudo: yes
